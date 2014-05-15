@@ -256,6 +256,14 @@ namespace ThoughtWorks.CruiseControl.Core.Sourcecontrol
         public string WorkingDirectory { get; set; }
 
         /// <summary>
+        /// The directory containing the local git repository. 
+        /// </summary>
+        /// <version>1.5</version>
+        /// <default>Project Working Directory</default>
+        [ReflectorProperty("excludeFromClean", Required = false)]
+        public string ExcludeFromClean { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Git" /> class.	
         /// </summary>
         /// <remarks></remarks>
@@ -668,8 +676,16 @@ namespace ThoughtWorks.CruiseControl.Core.Sourcecontrol
             buffer.AddArgument("-d");
             buffer.AddArgument("-f");
             buffer.AddArgument("-x");
-            Execute(NewProcessInfo(buffer.ToString(), result));
+            string[] pathsToExclude = {};
 
+            if ((ExcludeFromClean != null) && ExcludeFromClean.Length > 0) {
+                pathsToExclude = ExcludeFromClean.Split(';');
+                foreach(string i in pathsToExclude) {
+                    buffer.AddArgument("-e", i);
+                }
+            }
+
+            Execute(NewProcessInfo(buffer.ToString(), result));
             if (FetchSubmodules)
             {
                 buffer = new ProcessArgumentBuilder();
